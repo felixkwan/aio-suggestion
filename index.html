@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Search Optimization App</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.9/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Mock AI analysis function (replace with actual AI SDK integration)
+    const analyzeContent = async (content) => {
+      // Simulated AI response (in production, use Vercel AI SDK with OpenAI or similar)
+      const suggestions = [
+        content.length < 50 ? "Add more descriptive content to improve context for AI search." : null,
+        !content.includes("key features") ? "Include specific key features of your product/service." : null,
+        !content.match(/[0-9]/) ? "Add quantifiable metrics (e.g., '30% faster') to enhance credibility." : null,
+        content.split(' ').length < 20 ? "Use more diverse vocabulary to improve semantic search relevance." : null,
+        !content.includes("benefit") ? "Highlight user benefits to increase engagement." : null,
+      ].filter(Boolean);
+
+      return {
+        score: Math.min(100, 100 - suggestions.length * 20),
+        suggestions: suggestions.length > 0 ? suggestions : ["Your content is well-optimized!"],
+      };
+    };
+
+    const App = () => {
+      const [content, setContent] = useState("");
+      const [analysis, setAnalysis] = useState(null);
+      const [isLoading, setIsLoading] = useState(false);
+
+      const handleAnalyze = async () => {
+        if (!content.trim()) {
+          setAnalysis({ score: 0, suggestions: ["Please enter some content to analyze."] });
+          return;
+        }
+
+        setIsLoading(true);
+        try {
+          const result = await analyzeContent(content);
+          setAnalysis(result);
+        } catch (error) {
+          setAnalysis({ score: 0, suggestions: ["Error analyzing content. Please try again."] });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">AI Search Optimization Tool</h1>
+          <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md">
+            <textarea
+              className="w-full p-4 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="6"
+              placeholder="Enter your product or service description..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+            />
+            <button
+              className={`w-full py-2 px-4 text-white rounded-md ${
+                isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              }`}
+              onClick={handleAnalyze}
+              disabled={isLoading}
+            >
+              {isLoading ? "Analyzing..." : "Analyze Content"}
+            </button>
+          </div>
+
+          {analysis && (
+            <div className="w-full max-w-2xl mt-6 bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
+              <p className="text-lg mb-2">
+                Optimization Score: <span className="font-bold">{analysis.score}%</span>
+              </p>
+              <h3 className="text-md font-medium mb-2">Suggestions for Improvement:</h3>
+              <ul className="list-disc pl-5">
+                {analysis.suggestions.map((suggestion, index) => (
+                  <li key={index} className="mb-2">{suggestion}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>
